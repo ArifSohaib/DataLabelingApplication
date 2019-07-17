@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'Views/home_material.dart';
 
 void main() => runApp(MyApp());
 
@@ -110,9 +111,14 @@ class _MyHomePageState extends State<MyHomePage>{
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: "Image Label",
-
-
                     ),
+
+                  ),
+                  _uploaded == false ? Container(): RaisedButton(
+                    splashColor: Colors.green,
+                    onPressed: (){
+
+                    },
                   ),
                 ],
               ),
