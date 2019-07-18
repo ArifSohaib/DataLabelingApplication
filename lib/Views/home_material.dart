@@ -10,7 +10,7 @@ class TagsHomePage extends StatefulWidget {
 
 class _TagsHomePageState extends State<TagsHomePage> {
   final inputController = TextEditingController();
-
+  Record inputRecord;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,16 +28,34 @@ class _TagsHomePageState extends State<TagsHomePage> {
           MaterialButton(
             child: Text("Input new tag"),
             onPressed: (){
-              return showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    // Retrieve the text the that user has entered by using the
-                    // TextEditingController.
-                    content: Text(inputController.text),
-                  );
-                },
-              );
+              if(inputController.text.isNotEmpty) {
+                setState(() {
+                  inputRecord = Record.fromMap(
+                      {"id":inputController.text, "name": inputController.text, "count": 0});
+                });
+                Firestore.instance.collection('image_tags').add(
+                    {"name": inputController.text, "count": 0});
+                return showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      // Retrieve the text the that user has entered by using the
+                      // TextEditingController.
+                      content: Text(inputRecord.toString()),
+                    );
+                  },
+                );
+              }
+              else{
+                return showDialog(
+                  context: context,
+                  builder: (context){
+                    return AlertDialog(
+                      content: Text("Please input a name for the new tag"),
+                    );
+                  }
+                );
+              }
             },
           )
         ]
@@ -47,7 +65,7 @@ class _TagsHomePageState extends State<TagsHomePage> {
 
   Widget _buildBody(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection('band').snapshots(),
+      stream: Firestore.instance.collection('image_tags').snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return LinearProgressIndicator();
 
@@ -76,13 +94,13 @@ class _TagsHomePageState extends State<TagsHomePage> {
         ),
         child: ListTile(
           title: Text(record.name),
-          trailing: Text(record.votes.toString()),
+          trailing: Text(record.count.toString()),
           onTap: () => Firestore.instance.runTransaction((transaction) async {
             final freshSnapshot = await transaction.get(record.reference);
             final fresh = Record.fromSnapshot(freshSnapshot);
 
             await transaction
-                .update(record.reference, {'votes': fresh.votes + 1});
+                .update(record.reference, {'count': fresh.count + 1});
           }),
         ),
       ),
@@ -92,18 +110,17 @@ class _TagsHomePageState extends State<TagsHomePage> {
 
 class Record {
   final String name;
-  final int votes;
+  final int count;
   final DocumentReference reference;
-
   Record.fromMap(Map<String, dynamic> map, {this.reference})
       : assert(map['name'] != null),
-        assert(map['votes'] != null),
+        assert(map['count'] != null),
         name = map['name'],
-        votes = map['votes'];
+        count = map['count'];
 
   Record.fromSnapshot(DocumentSnapshot snapshot)
       : this.fromMap(snapshot.data, reference: snapshot.reference);
 
   @override
-  String toString() => "Record<$name:$votes>";
+  String toString() => "Record<$name:$count>";
 }
