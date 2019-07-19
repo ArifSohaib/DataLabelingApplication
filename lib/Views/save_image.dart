@@ -77,7 +77,7 @@ class ImageDetails extends StatelessWidget {
             final fresh = Tags.fromSnapshot(freshSnapshot);
 
             await transaction
-                .update(record.reference, {'url': this.url,'count': fresh.count + 1});
+                .update(record.reference, {'url': FieldValue.arrayUnion( [this.url]),'count': fresh.count + 1});
           }),
         ),
       ),
