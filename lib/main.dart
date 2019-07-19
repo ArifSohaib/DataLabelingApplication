@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import  'package:cloud_firestore/cloud_firestore.dart';
 import 'Views/home_material.dart';
+import 'Views/save_image.dart';
 
 void main() => runApp(MyApp());
 
@@ -32,6 +34,7 @@ class _MyHomePageState extends State<MyHomePage>{
   String _downloadUrl;
   String _image_label;
   StorageReference _reference = FirebaseStorage.instance.ref().child('${DateTime.now()}.jpg');
+  final tagController = TextEditingController();
 
   Future getImage(bool isCamera) async{
     File image;
@@ -104,25 +107,16 @@ class _MyHomePageState extends State<MyHomePage>{
                   downloadImage();
                 },
               ),
-              Column(
-                children: <Widget>[
-                  _uploaded == false ? Container():TextField(
-
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: "Image Label",
-                    ),
-
-                  ),
-                  _uploaded == false ? Container(): RaisedButton(
-                    splashColor: Colors.green,
+              _downloadUrl == null ? Container(): Container(
+                child: RaisedButton(
+                  child: Text("Set Image Tag"),
                     onPressed: (){
-
-                    },
-                  ),
-                ],
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ImageDetails(url: _downloadUrl))
+                  );
+                }),
               ),
-              _downloadUrl == null ? Container(): Image.network(_downloadUrl, height: 300.0, width: 300.0,),
 
             ],
           ),
@@ -131,3 +125,4 @@ class _MyHomePageState extends State<MyHomePage>{
     );
   }
 }
+
